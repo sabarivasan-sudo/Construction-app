@@ -107,18 +107,18 @@ const Attendance = () => {
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={weeklyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ECEFF1" />
-            <XAxis dataKey="day" stroke="#263238" />
-            <YAxis stroke="#263238" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <XAxis dataKey="day" stroke="#374151" />
+            <YAxis stroke="#374151" />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#fff',
-                border: '1px solid #ECEFF1',
+                border: '1px solid #F3F4F6',
                 borderRadius: '8px',
               }}
             />
-            <Bar dataKey="present" fill="#43A047" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="absent" fill="#E53935" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="present" fill="#10B981" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="absent" fill="#EF4444" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </motion.div>

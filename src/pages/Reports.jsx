@@ -23,7 +23,7 @@ const Reports = () => {
     { month: 'Apr', amount: 165000 },
   ]
 
-  const COLORS = ['#1A73E8', '#F9A825', '#43A047', '#E53935']
+  const COLORS = ['#6366F1', '#8B5CF6', '#10B981', '#34D399']
 
   return (
     <motion.div
@@ -81,17 +81,17 @@ const Reports = () => {
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={projectData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ECEFF1" />
-            <XAxis dataKey="name" stroke="#263238" />
-            <YAxis stroke="#263238" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <XAxis dataKey="name" stroke="#374151" />
+            <YAxis stroke="#374151" />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#fff',
-                border: '1px solid #ECEFF1',
+                border: '1px solid #F3F4F6',
                 borderRadius: '8px',
               }}
             />
-            <Bar dataKey="progress" fill="#1A73E8" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="progress" fill="#6366F1" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </motion.div>
@@ -112,17 +112,17 @@ const Reports = () => {
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={expenseData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ECEFF1" />
-            <XAxis dataKey="month" stroke="#263238" />
-            <YAxis stroke="#263238" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <XAxis dataKey="month" stroke="#374151" />
+            <YAxis stroke="#374151" />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#fff',
-                border: '1px solid #ECEFF1',
+                border: '1px solid #F3F4F6',
                 borderRadius: '8px',
               }}
             />
-            <Line type="monotone" dataKey="amount" stroke="#F9A825" strokeWidth={3} />
+            <Line type="monotone" dataKey="amount" stroke="#8B5CF6" strokeWidth={3} />
           </LineChart>
         </ResponsiveContainer>
       </motion.div>

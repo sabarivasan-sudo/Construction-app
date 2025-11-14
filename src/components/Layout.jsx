@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import BottomNav from './BottomNav'
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const location = useLocation()
@@ -26,58 +26,96 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar - Desktop */}
-      {!isMobile && (
+  useEffect(() => {
+    if (isMobile && sidebarOpen) {
+      document.body.style.overflow = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+    }
+  }, [isMobile, sidebarOpen])
+
+  // Desktop Layout
+  if (!isMobile) {
+    return (
+      <div className="flex w-full h-screen overflow-hidden">
+        {/* Sidebar - Desktop */}
         <Sidebar 
           isOpen={sidebarOpen} 
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-      )}
 
-      {/* Mobile Sidebar Overlay */}
-      {isMobile && sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar - Mobile */}
-      {isMobile && (
-        <div className={`fixed left-0 top-0 h-full z-50 transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
-          <Sidebar 
-            isOpen={true} 
-            onToggle={() => setSidebarOpen(false)}
-            onLinkClick={() => setSidebarOpen(false)}
+        {/* Main Content */}
+        <div className="flex flex-col flex-1 overflow-hidden bg-background">
+          {/* Header */}
+          <Header 
+            onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+            showMenuButton={false}
           />
+
+          {/* Content */}
+          <main className="flex-1 overflow-auto p-6">
+            <div className="max-w-7xl mx-auto w-full">
+              <Outlet />
+            </div>
+          </main>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <Header 
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-          showMenuButton={isMobile}
-        />
+  // Mobile Layout
+  return (
+    <>
+      {/* Main Container - Mobile */}
+      <div className="flex w-full h-screen overflow-hidden bg-background">
+        {/* Main Content - Always full width on mobile */}
+        <div className="flex flex-col flex-1 overflow-hidden bg-background w-full">
+          {/* Header */}
+          <Header 
+            onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+            showMenuButton={true}
+          />
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
+          {/* Content */}
+          <main className="flex-1 overflow-auto p-4">
+            <div className="max-w-7xl mx-auto w-full">
+              <Outlet />
+            </div>
+          </main>
+        </div>
+
+        {/* Bottom Nav - Mobile */}
+        <BottomNav currentPath={location.pathname} />
       </div>
 
-      {/* Bottom Navigation - Mobile */}
-      {isMobile && <BottomNav currentPath={location.pathname} />}
-    </div>
+      {/* Mobile Sidebar - Fixed overlay */}
+      {sidebarOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 transition-transform duration-300 ease-in-out">
+            <Sidebar 
+              isOpen={true} 
+              onToggle={() => setSidebarOpen(false)}
+              onLinkClick={() => setSidebarOpen(false)}
+              isMobile={true}
+            />
+          </div>
+        </>
+      )}
+    </>
   )
 }
 
 export default Layout
-

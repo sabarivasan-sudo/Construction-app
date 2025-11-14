@@ -126,17 +126,17 @@ const PettyCash = () => {
         <h2 className="text-xl font-bold text-dark mb-4">Weekly Expenses</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={expenseData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ECEFF1" />
-            <XAxis dataKey="day" stroke="#263238" />
-            <YAxis stroke="#263238" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+            <XAxis dataKey="day" stroke="#374151" />
+            <YAxis stroke="#374151" />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#fff',
-                border: '1px solid #ECEFF1',
+                border: '1px solid #F3F4F6',
                 borderRadius: '8px',
               }}
             />
-            <Line type="monotone" dataKey="amount" stroke="#F9A825" strokeWidth={2} />
+            <Line type="monotone" dataKey="amount" stroke="#8B5CF6" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </motion.div>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-const ProgressCircle = ({ percentage, size = 120, strokeWidth = 8, color = '#1A73E8' }) => {
+const ProgressCircle = ({ percentage, size = 120, strokeWidth = 8, color = '#6366F1' }) => {
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
   const offset = circumference - (percentage / 100) * circumference
@@ -13,7 +13,7 @@ const ProgressCircle = ({ percentage, size = 120, strokeWidth = 8, color = '#1A7
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#ECEFF1"
+          stroke="#F3F4F6"
           strokeWidth={strokeWidth}
           fill="none"
         />

@@ -8,19 +8,33 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#1A73E8',
-          dark: '#0D47A1',
-          light: '#4285F4',
+          DEFAULT: '#6A11CB', // Premium Purple
+          dark: '#4F46E5',
+          light: '#818CF8',
         },
         secondary: {
-          DEFAULT: '#F9A825',
-          light: '#FFB300',
+          DEFAULT: '#00C9A7', // Premium Teal
+          light: '#34D399',
         },
-        dark: '#263238',
-        light: '#ECEFF1',
-        background: '#F5F7FA',
-        success: '#43A047',
-        danger: '#E53935',
+        dark: '#374151', // Soft Dark Grey
+        light: '#F3F4F6', // Soft Light Grey
+        background: '#F9F7FF', // Very Light Purple Mist - Premium background
+        backgroundSecondary: '#FAFAFA', // Cool White
+        backgroundAccent: '#F6F3FF', // Light Lavender Gray
+        success: '#00C9A7', // Premium Teal
+        danger: '#EF4444', // Soft Red
+        violet: '#8B5CF6', // Pleasant Violet accent
+        construction: {
+          orange: '#FF8A00', // Construction Orange
+          orangeLight: '#FFB347', // Premium Mild Orange
+          orangeDark: '#F97316', // Industrial Orange
+        },
+        warning: '#FACC15',
+        gradient: {
+          purple: '#6A11CB',
+          blue: '#2575FC',
+          teal: '#00C9A7',
+        },
       },
       borderRadius: {
         'xl': '16px',

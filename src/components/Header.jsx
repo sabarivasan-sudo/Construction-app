@@ -1,12 +1,16 @@
-import { FiSearch, FiBell, FiMenu } from 'react-icons/fi'
-import { motion } from 'framer-motion'
+import { FiSearch, FiBell, FiMenu, FiLogOut } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 
 const Header = ({ onMenuClick, showMenuButton }) => {
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    // Clear any auth state if needed
+    // Navigate to login page
+    navigate('/login')
+  }
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="bg-white border-b border-light shadow-soft px-4 md:px-6 py-4 flex items-center justify-between"
+    <header className="h-16 flex items-center justify-between px-4 border-b bg-white shadow-soft"
     >
       <div className="flex items-center gap-4 flex-1">
         {showMenuButton && (
@@ -46,9 +50,17 @@ const Header = ({ onMenuClick, showMenuButton }) => {
             <p className="text-sm font-semibold text-dark">John Doe</p>
             <p className="text-xs text-gray-500">Project Manager</p>
           </div>
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="ml-4 p-2 rounded-lg hover:bg-light transition-colors group"
+            title="Logout"
+          >
+            <FiLogOut className="w-5 h-5 text-dark group-hover:text-primary transition-colors" />
+          </button>
         </div>
       </div>
-    </motion.header>
+    </header>
   )
 }
 
