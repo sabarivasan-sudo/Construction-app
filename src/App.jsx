@@ -3,7 +3,9 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Projects from './pages/Projects'
+import ProjectDetails from './pages/ProjectDetails'
 import Tasks from './pages/Tasks'
+import TaskDetails from './pages/TaskDetails'
 import Issues from './pages/Issues'
 import Attendance from './pages/Attendance'
 import Inventory from './pages/Inventory'
@@ -23,7 +25,9 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="projects" element={<Projects />} />
+        <Route path="projects/:id" element={<ProjectDetails />} />
         <Route path="tasks" element={<Tasks />} />
+        <Route path="tasks/:id" element={<TaskDetails />} />
         <Route path="issues" element={<Issues />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="inventory" element={<Inventory />} />

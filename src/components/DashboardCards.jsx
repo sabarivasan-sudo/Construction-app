@@ -77,43 +77,39 @@ const InfoCard = ({ icon: Icon, value, label, trend, trendColor, iconGradient })
   )
 }
 
-const DashboardCards = () => {
+const DashboardCards = ({ kpiData }) => {
   const kpiCards = [
     {
       id: 0,
-      value: "12",
+      value: kpiData?.activeProjects?.toString() || "0",
       label: "Active Projects",
       icon: FiBriefcase,
-      trend: "+2 this month",
+      trend: null, // Can be calculated from trends
       trendColor: "text-green-600",
-      iconGradient: "linear-gradient(135deg, #6A11CB, #9333EA)", // Purple gradient
     },
     {
       id: 1,
-      value: "145",
+      value: kpiData?.dailyAttendance?.toString() || "0",
       label: "Daily Attendance",
       icon: FiUsers,
-      trend: "+5%",
+      trend: null,
       trendColor: "text-green-600",
-      iconGradient: "linear-gradient(135deg, #00C9A7, #34D399)", // Teal/Green gradient
     },
     {
       id: 2,
-      value: "23",
+      value: kpiData?.activeTasks?.toString() || "0",
       label: "Active Tasks",
       icon: FiCheckSquare,
-      trend: "3 completed",
+      trend: null,
       trendColor: "text-green-600",
-      iconGradient: "linear-gradient(135deg, #00C9A7, #34D399)", // Teal/Green gradient
     },
     {
       id: 3,
-      value: "8",
+      value: kpiData?.pendingIssues?.toString() || "0",
       label: "Pending Issues",
       icon: FiAlertCircle,
-      trend: "-2 resolved",
+      trend: null,
       trendColor: "text-red-600",
-      iconGradient: "linear-gradient(135deg, #EF4444, #F87171)", // Red gradient
     },
   ]
 

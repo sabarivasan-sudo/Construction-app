@@ -7,6 +7,7 @@ import {
   FiCheckSquare,
   FiAlertCircle,
   FiUsers,
+  FiBriefcase,
 } from 'react-icons/fi'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import BlurText from '../components/BlurText'
@@ -15,8 +16,108 @@ import DashboardCards from '../components/DashboardCards'
 
 const Dashboard = () => {
   const [showCards, setShowCards] = useState(false)
-  const userName = 'Sabari'
+  const [dashboardData, setDashboardData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null)
   
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+
+  useEffect(() => {
+    // Get user from localStorage
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+      try {
+        setUser(JSON.parse(userStr))
+      } catch (e) {
+        console.error('Error parsing user data:', e)
+      }
+    }
+
+    // Fetch dashboard data
+    fetchDashboard()
+  }, [])
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${API_URL}/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardData(data.data)
+      } else {
+        console.error('Failed to fetch dashboard data')
+        // Set default empty data if API fails
+        setDashboardData({
+          kpis: {
+            activeProjects: 0,
+            dailyAttendance: 0,
+            activeTasks: 0,
+            pendingIssues: 0
+          },
+          materialStockData: [],
+          projectProgress: 0,
+          activityFeed: [],
+          activeTasksList: [],
+          pettyCash: {
+            balance: 0
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard:', error)
+      // Set default empty data on error
+      setDashboardData({
+        kpis: {
+          activeProjects: 0,
+          dailyAttendance: 0,
+          activeTasks: 0,
+          pendingIssues: 0
+        },
+        materialStockData: [],
+        projectProgress: 0,
+        activityFeed: [],
+        activeTasksList: [],
+        pettyCash: {
+          balance: 0
+        }
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Refresh dashboard when window regains focus or when navigating back
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchDashboard()
+    }
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchDashboard()
+      }
+    }
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
+  // Refresh dashboard data periodically (every 30 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDashboard()
+    }, 30000) // Refresh every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
+
   // Time-based greeting
   const getTimeGreeting = () => {
     const hour = new Date().getHours()
@@ -32,26 +133,13 @@ const Dashboard = () => {
   }
 
   const timeGreeting = getTimeGreeting()
-  const projectProgress = 68
-  const dailyAttendance = 145
-  const activeTasks = 23
-  const pendingIssues = 8
+  const userName = user?.name || 'User'
 
-  const materialStockData = [
-    { name: 'Cement', stock: 85, capacity: 100 },
-    { name: 'Steel', stock: 60, capacity: 100 },
-    { name: 'Bricks', stock: 90, capacity: 100 },
-    { name: 'Sand', stock: 75, capacity: 100 },
-    { name: 'Gravel', stock: 55, capacity: 100 },
-  ]
-
-  const activityFeed = [
-    { id: 1, type: 'task', message: 'Task "Foundation Work" completed', time: '2 mins ago', icon: FiCheckSquare, color: '#00C9A7' },
-    { id: 2, type: 'issue', message: 'New issue reported in Building A', time: '15 mins ago', icon: FiAlertCircle, color: '#EF4444' },
-    { id: 3, type: 'material', message: 'Cement stock updated - 85 units', time: '1 hour ago', icon: FiPackage, color: '#6A11CB' },
-    { id: 4, type: 'attendance', message: '145 workers checked in today', time: '2 hours ago', icon: FiUsers, color: '#FF8A00' },
-    { id: 5, type: 'transfer', message: 'Material transfer to Site B', time: '3 hours ago', icon: FiActivity, color: '#2575FC' },
-  ]
+  // Use real data or defaults
+  const projectProgress = dashboardData?.projectProgress || 0
+  const materialStockData = dashboardData?.materialStockData || []
+  const activityFeed = dashboardData?.activityFeed || []
+  const activeTasksList = dashboardData?.activeTasksList || []
 
   // Premium chart colors matching the gradient theme
   const COLORS = ['#6A11CB', '#2575FC', '#00C9A7', '#FF8A00', '#EF4444']
@@ -189,15 +277,22 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <BlurText
-            text={`${timeGreeting.greeting}, ${userName} — wishing you a powerful day on-site!`}
-            onComplete={handleBlurComplete}
-          />
+          {user && (
+            <BlurText
+              text={`${timeGreeting.greeting}, ${userName} — wishing you a powerful day on-site!`}
+              onComplete={handleBlurComplete}
+            />
+          )}
         </div>
 
         {/* KPI Cards - 3D Drop Animation */}
         {showCards && (
-          <DashboardCards />
+          <DashboardCards kpiData={dashboardData?.kpis || {
+            activeProjects: 0,
+            dailyAttendance: 0,
+            activeTasks: 0,
+            pendingIssues: 0
+          }} />
         )}
 
         {/* Charts Section - Only show after cards */}
@@ -218,8 +313,9 @@ const Dashboard = () => {
                 <h2 className="text-lg font-semibold text-gray-800">Material Stock Levels</h2>
                 <FiPackage className="w-6 h-6 text-primary" />
               </div>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={materialStockData}>
+              {materialStockData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={materialStockData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                   <XAxis 
                     dataKey="name" 
@@ -249,6 +345,11 @@ const Dashboard = () => {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-400">
+                  <p>No material data available</p>
+                </div>
+              )}
             </motion.div>
 
             {/* Project Progress Ring */}
@@ -331,12 +432,7 @@ const Dashboard = () => {
                 <FiCheckSquare className="w-6 h-6 text-primary" />
               </div>
               <div className="space-y-4">
-                {[
-                  { title: 'Foundation Work', project: 'Building A', progress: 75, priority: 'high' },
-                  { title: 'Electrical Installation', project: 'Building B', progress: 45, priority: 'medium' },
-                  { title: 'Plumbing Setup', project: 'Building A', progress: 60, priority: 'high' },
-                  { title: 'Roofing', project: 'Building C', progress: 30, priority: 'low' },
-                ].map((task, index) => (
+                {activeTasksList.length > 0 ? activeTasksList.map((task, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
@@ -368,7 +464,9 @@ const Dashboard = () => {
                       />
                     </div>
                   </motion.div>
-                ))}
+                )) : (
+                  <p className="text-center text-gray-500 py-8">No active tasks</p>
+                )}
               </div>
             </motion.div>
 
@@ -383,11 +481,36 @@ const Dashboard = () => {
                 <FiActivity className="w-6 h-6 text-primary" />
               </div>
               <div className="space-y-4">
-                {activityFeed.map((activity, index) => {
-                  const Icon = activity.icon
+                {activityFeed.length > 0 ? activityFeed.map((activity, index) => {
+                  // Map activity type to icon
+                  const iconMap = {
+                    task: FiCheckSquare,
+                    issue: FiAlertCircle,
+                    material: FiPackage,
+                    attendance: FiUsers,
+                    transfer: FiActivity,
+                    consumption: FiPackage,
+                    'petty-cash': FiDollarSign,
+                    project: FiBriefcase,
+                    user: FiUsers
+                  }
+                  const Icon = iconMap[activity.type] || FiActivity
+                  const colorMap = {
+                    task: '#00C9A7',
+                    issue: '#EF4444',
+                    material: '#6A11CB',
+                    attendance: '#FF8A00',
+                    transfer: '#2575FC',
+                    consumption: '#6A11CB',
+                    'petty-cash': '#FACC15',
+                    project: '#6A11CB',
+                    user: '#2575FC'
+                  }
+                  const activityColor = colorMap[activity.type] || '#2575FC'
+                  
                   return (
                     <motion.div
-                      key={activity.id}
+                      key={activity.id || index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 2.5 + index * 0.1 }}
@@ -395,9 +518,9 @@ const Dashboard = () => {
                     >
                       <div 
                         className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: `${activity.color}20` }}
+                        style={{ backgroundColor: `${activityColor}20` }}
                       >
-                        <Icon className="w-5 h-5" style={{ color: activity.color }} />
+                        <Icon className="w-5 h-5" style={{ color: activityColor }} />
                       </div>
                       <div className="flex-1">
                         <p className="text-dark font-medium">{activity.message}</p>
@@ -405,7 +528,9 @@ const Dashboard = () => {
                       </div>
                     </motion.div>
                   )
-                })}
+                }) : (
+                  <p className="text-center text-gray-500 py-8">No recent activity</p>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -423,7 +548,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">Petty Cash</h2>
-                <p className="text-3xl font-bold text-gray-900">₹14,680</p>
+                <p className="text-3xl font-bold text-gray-900">₹{dashboardData?.pettyCash?.balance?.toLocaleString() || '0'}</p>
                 <p className="text-sm text-gray-500 mt-1">Available balance</p>
               </div>
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-warning to-yellow-500 flex items-center justify-center">
