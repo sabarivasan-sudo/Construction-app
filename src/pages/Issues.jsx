@@ -1285,13 +1285,7 @@ const Issues = () => {
       </AnimatePresence>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        <AnimatePresence>
-          {toasts.map(toast => (
-            <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
-          ))}
-        </AnimatePresence>
-      </div>
+      <Toast toasts={toasts} removeToast={removeToast} />
     </motion.div>
   )
 }
