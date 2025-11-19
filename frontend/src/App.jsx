@@ -7,6 +7,7 @@ import ProjectDetails from './pages/ProjectDetails'
 import Tasks from './pages/Tasks'
 import TaskDetails from './pages/TaskDetails'
 import Issues from './pages/Issues'
+import IssueDetails from './pages/IssueDetails'
 import Attendance from './pages/Attendance'
 import Inventory from './pages/Inventory'
 import SiteTransfer from './pages/SiteTransfer'
@@ -29,6 +30,7 @@ function App() {
         <Route path="tasks" element={<Tasks />} />
         <Route path="tasks/:id" element={<TaskDetails />} />
         <Route path="issues" element={<Issues />} />
+        <Route path="issues/:id" element={<IssueDetails />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="site-transfer" element={<SiteTransfer />} />
