@@ -61,7 +61,15 @@ const issueSchema = new mongoose.Schema({
   },
   tags: [{
     type: String,
-    enum: ['plumbing', 'electrical', 'structural', 'material-quality', 'other']
+    validate: {
+      validator: function(v) {
+        if (!v || typeof v !== 'string') return false
+        // Allow standard tags or custom tags starting with "other:"
+        const standardTags = ['plumbing', 'electrical', 'structural', 'material-quality', 'other']
+        return standardTags.includes(v) || v.startsWith('other:')
+      },
+      message: 'Tag must be a standard tag or a custom tag starting with "other:"'
+    }
   }],
   attachments: [{
     name: { type: String, required: true },

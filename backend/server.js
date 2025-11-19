@@ -1,8 +1,13 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import connectDB from './config/database.js'
 import routes from './routes/index.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Load env vars
 dotenv.config()
@@ -35,10 +40,23 @@ app.get('/api/health', (req, res) => {
   })
 })
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' })
-})
+// Serve static files from React app in production
+if (process.env.NODE_ENV === 'production') {
+  const publicPath = path.join(__dirname, 'public')
+  
+  // Serve static files
+  app.use(express.static(publicPath))
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'))
+  })
+} else {
+  // 404 handler for development (API routes only)
+  app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: 'API route not found' })
+  })
+}
 
 // Error handler
 app.use((err, req, res, next) => {
