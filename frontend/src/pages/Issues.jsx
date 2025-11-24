@@ -168,12 +168,30 @@ const Issues = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token')
+      
+      if (!token) {
+        console.warn('No token found, user may need to login')
+        return
+      }
+
       const response = await fetch(`${API_URL}/users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
+      
       if (response.ok) {
         const data = await response.json()
         setUsers(data.data || [])
+      } else if (response.status === 401) {
+        // Token expired or invalid - clear storage and redirect to login
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to fetch users' }))
+        console.error('Error fetching users:', errorData.message)
       }
     } catch (error) {
       console.error('Error fetching users:', error)

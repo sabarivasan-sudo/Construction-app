@@ -40,13 +40,13 @@ const Sidebar = ({ isOpen, onToggle, onLinkClick, isMobile = false }) => {
   // Mobile sidebar - fixed width
   if (isMobile) {
     return (
-      <aside className="h-full w-full bg-white border-r border-light shadow-soft">
+      <aside className="h-full w-full bg-white border-r border-light shadow-soft overflow-y-auto">
         {/* Toggle Button */}
-        <div className="flex items-center justify-between p-4 border-b border-light">
-          <h1 className="text-xl font-bold text-dark">ConstructPro</h1>
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-light sticky top-0 bg-white z-10">
+          <h1 className="text-lg sm:text-xl font-bold text-dark truncate">ConstructPro</h1>
           <button
             onClick={onToggle}
-            className="p-2 rounded-lg hover:bg-light transition-colors"
+            className="p-2 rounded-lg hover:bg-light transition-colors flex-shrink-0"
           >
             <FiChevronLeft className="w-5 h-5 text-dark" />
           </button>
@@ -62,15 +62,15 @@ const Sidebar = ({ isOpen, onToggle, onLinkClick, isMobile = false }) => {
                 to={item.path}
                 onClick={onLinkClick}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all ${
+                  `flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 mb-1 rounded-xl transition-all text-sm sm:text-base ${
                     isActive
                       ? 'bg-primary text-white shadow-medium'
                       : 'text-dark hover:bg-light'
                   }`
                 }
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="font-medium truncate">{item.label}</span>
               </NavLink>
             )
           })}
@@ -82,20 +82,20 @@ const Sidebar = ({ isOpen, onToggle, onLinkClick, isMobile = false }) => {
   // Desktop sidebar - dynamic width with exact classes
   return (
     <aside
-      className={`h-full transition-all duration-300 ease-in-out ${
+      className={`h-full transition-all duration-300 ease-in-out overflow-hidden ${
         isOpen ? 'w-64' : 'w-20'
-      } bg-white border-r border-light shadow-soft relative`}
+      } bg-white border-r border-light shadow-soft relative flex flex-col`}
     >
       {/* Toggle Button */}
-      <div className="flex items-center justify-between p-4 border-b border-light">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-light flex-shrink-0">
         <AnimatePresence>
           {isOpen && (
-            <h1 className="text-xl font-bold text-dark">ConstructPro</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-dark truncate">ConstructPro</h1>
           )}
         </AnimatePresence>
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-light transition-colors"
+          className="p-2 rounded-lg hover:bg-light transition-colors flex-shrink-0"
         >
           {isOpen ? (
             <FiChevronLeft className="w-5 h-5 text-dark" />
@@ -106,7 +106,7 @@ const Sidebar = ({ isOpen, onToggle, onLinkClick, isMobile = false }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="p-2">
+      <nav className="p-2 flex-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon
           return (
@@ -114,17 +114,17 @@ const Sidebar = ({ isOpen, onToggle, onLinkClick, isMobile = false }) => {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all ${
+                `flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 mb-1 rounded-xl transition-all text-sm sm:text-base ${
                   isActive
                     ? 'bg-primary text-white shadow-medium'
                     : 'text-dark hover:bg-light'
                 }`
               }
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <AnimatePresence>
                 {isOpen && (
-                  <span className="font-medium">{item.label}</span>
+                  <span className="font-medium truncate">{item.label}</span>
                 )}
               </AnimatePresence>
             </NavLink>

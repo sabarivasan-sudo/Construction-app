@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLocation, Outlet } from 'react-router-dom'
+import { useLocation, Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import BottomNav from './BottomNav'
@@ -8,6 +8,18 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const location = useLocation()
+  const navigate = useNavigate()
+
+  // Check authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    
+    // If no token or user, redirect to login
+    if (!token || !user) {
+      navigate('/login')
+    }
+  }, [navigate])
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,7 +71,7 @@ const Layout = () => {
           />
 
           {/* Content */}
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
             <div className="max-w-7xl mx-auto w-full">
               <Outlet />
             </div>
@@ -83,7 +95,7 @@ const Layout = () => {
           />
 
           {/* Content */}
-          <main className="flex-1 overflow-auto p-4">
+          <main className="flex-1 overflow-auto p-3 sm:p-4">
             <div className="max-w-7xl mx-auto w-full">
               <Outlet />
             </div>

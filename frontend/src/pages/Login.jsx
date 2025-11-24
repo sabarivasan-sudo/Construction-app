@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiMail, FiLock, FiEye, FiEyeOff, FiPackage, FiBriefcase, FiUser } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -18,9 +18,25 @@ const Login = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    if (token && user) {
+      navigate('/')
+    }
+  }, [navigate])
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+    
+    // Basic validation
+    if (!email || !password) {
+      setError('Please enter both email and password')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -32,18 +48,38 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+      // Check if response is ok before parsing JSON
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError)
+        setError('Invalid response from server. Please check if backend is running.')
+        setLoading(false)
+        return
+      }
 
       if (response.ok && data.success) {
+        // Clear any old data
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        
+        // Store new token and user
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        navigate('/')
+        
+        // Force full page reload to ensure clean state
+        window.location.href = '/'
       } else {
-        setError(data.message || 'Login failed')
+        setError(data.message || 'Login failed. Please check your credentials.')
       }
     } catch (err) {
-      setError('Network error. Please check if backend is running.')
       console.error('Login error:', err)
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        setError('Cannot connect to server. Please check if backend is running on port 5000.')
+      } else {
+        setError('Network error. Please check if backend is running.')
+      }
     } finally {
       setLoading(false)
     }
@@ -82,9 +118,16 @@ const Login = () => {
       const data = await response.json()
 
       if (response.ok && data.success) {
+        // Clear any old data
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        
+        // Store new token and user
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        navigate('/')
+        
+        // Force full page reload to ensure clean state
+        window.location.href = '/'
       } else {
         setError(data.message || 'Registration failed')
       }
