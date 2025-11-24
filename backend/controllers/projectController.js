@@ -6,7 +6,31 @@ import Activity from '../models/Activity.js'
 // @access  Private
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find()
+    // Get current user to check their assigned projects
+    const User = (await import('../models/User.js')).default
+    const currentUser = await User.findById(req.user.id).select('role projects')
+    
+    let filter = {}
+    
+    // If user is not admin, filter by assigned projects
+    if (currentUser.role !== 'admin') {
+      if (currentUser.projects && currentUser.projects.length > 0) {
+        // Convert to ObjectIds if they're strings
+        const projectIds = currentUser.projects.map(p => 
+          typeof p === 'string' ? p : p._id || p
+        )
+        filter._id = { $in: projectIds }
+      } else {
+        // If user has no assigned projects, return empty array
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        })
+      }
+    }
+    
+    const projects = await Project.find(filter)
       .populate('projectManager', 'name email')
       .populate('team', 'name email')
       .populate('createdBy', 'name')

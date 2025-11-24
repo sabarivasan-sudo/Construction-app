@@ -12,6 +12,14 @@ const __dirname = path.dirname(__filename)
 // Load env vars
 dotenv.config()
 
+// Check required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('❌ ERROR: JWT_SECRET is not set in environment variables!')
+  console.error('Please add JWT_SECRET to your .env file in the backend folder')
+  console.error('Example: JWT_SECRET=your_super_secret_jwt_key_change_this_in_production')
+  process.exit(1)
+}
+
 // Connect to database
 connectDB()
 

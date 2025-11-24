@@ -9,7 +9,44 @@ export const getTasks = async (req, res) => {
     const { project, status, assignedTo } = req.query
     const filter = {}
 
-    if (project) filter.project = project
+    // Get current user to check their assigned projects
+    const User = (await import('../models/User.js')).default
+    const currentUser = await User.findById(req.user.id).select('role projects')
+    
+    // If user is not admin, filter by assigned projects
+    if (currentUser.role !== 'admin') {
+      if (currentUser.projects && currentUser.projects.length > 0) {
+        // Convert to ObjectIds if they're strings
+        const projectIds = currentUser.projects.map(p => 
+          typeof p === 'string' ? p : p._id || p
+        )
+        filter.project = { $in: projectIds }
+      } else {
+        // If user has no assigned projects, return empty array
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        })
+      }
+    }
+
+    // If project query param is provided, further filter (must be within user's assigned projects)
+    if (project) {
+      if (currentUser.role === 'admin' || (currentUser.projects && currentUser.projects.some(p => {
+        const pId = typeof p === 'string' ? p : p._id || p
+        return pId.toString() === project.toString()
+      }))) {
+        filter.project = project
+      } else {
+        // User trying to access project they don't have access to
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        })
+      }
+    }
     if (status) filter.status = status
     if (assignedTo) filter.assignedTo = assignedTo
 

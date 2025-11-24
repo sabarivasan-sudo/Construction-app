@@ -6,8 +6,45 @@ export const getAttendances = async (req, res) => {
     const { user, project, date } = req.query
     const filter = {}
 
+    // Get current user to check their assigned projects
+    const User = (await import('../models/User.js')).default
+    const currentUser = await User.findById(req.user.id).select('role projects')
+    
+    // If user is not admin, filter by assigned projects
+    if (currentUser.role !== 'admin') {
+      if (currentUser.projects && currentUser.projects.length > 0) {
+        // Convert to ObjectIds if they're strings
+        const projectIds = currentUser.projects.map(p => 
+          typeof p === 'string' ? p : p._id || p
+        )
+        filter.project = { $in: projectIds }
+      } else {
+        // If user has no assigned projects, return empty array
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        })
+      }
+    }
+
     if (user) filter.user = user
-    if (project) filter.project = project
+    // If project query param is provided, further filter (must be within user's assigned projects)
+    if (project) {
+      if (currentUser.role === 'admin' || (currentUser.projects && currentUser.projects.some(p => {
+        const pId = typeof p === 'string' ? p : p._id || p
+        return pId.toString() === project.toString()
+      }))) {
+        filter.project = project
+      } else {
+        // User trying to access project they don't have access to
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        })
+      }
+    }
     if (date) {
       const startDate = new Date(date)
       startDate.setHours(0, 0, 0, 0)
@@ -17,7 +54,7 @@ export const getAttendances = async (req, res) => {
     }
 
     const attendances = await Attendance.find(filter)
-      .populate('user', 'name email')
+      .populate('user', 'name email role department')
       .populate('project', 'name')
       .sort({ date: -1 })
 
@@ -34,6 +71,10 @@ export const getAttendances = async (req, res) => {
 export const createAttendance = async (req, res) => {
   try {
     const attendance = await Attendance.create(req.body)
+    
+    const populatedAttendance = await Attendance.findById(attendance._id)
+      .populate('user', 'name email role department')
+      .populate('project', 'name')
 
     await Activity.create({
       type: 'attendance',
@@ -47,7 +88,7 @@ export const createAttendance = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: attendance
+      data: populatedAttendance
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -61,6 +102,8 @@ export const updateAttendance = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     )
+      .populate('user', 'name email')
+      .populate('project', 'name')
 
     if (!attendance) {
       return res.status(404).json({ message: 'Attendance not found' })
@@ -76,6 +119,55 @@ export const updateAttendance = async (req, res) => {
     res.json({
       success: true,
       data: attendance
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const deleteAttendance = async (req, res) => {
+  try {
+    const attendance = await Attendance.findByIdAndDelete(req.params.id)
+
+    if (!attendance) {
+      return res.status(404).json({ message: 'Attendance not found' })
+    }
+
+    await Activity.create({
+      type: 'attendance',
+      action: 'deleted',
+      message: `Attendance deleted for ${attendance.date}`,
+      entityId: attendance._id,
+      entityType: 'Attendance',
+      project: attendance.project,
+      user: req.user.id
+    })
+
+    res.json({
+      success: true,
+      message: 'Attendance deleted successfully'
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const uploadAttendance = async (req, res) => {
+  try {
+    // TODO: Implement Excel/CSV parsing
+    // For now, return a placeholder response
+    // You'll need to install: multer, xlsx, or csv-parser
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' })
+    }
+
+    // Placeholder response - implement actual parsing logic
+    res.json({
+      success: true,
+      message: 'File upload endpoint ready. Excel parsing to be implemented.',
+      count: 0,
+      data: []
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

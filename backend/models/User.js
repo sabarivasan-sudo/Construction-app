@@ -40,7 +40,11 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String
-  }
+  },
+  projects: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
+  }]
 }, {
   timestamps: true
 })

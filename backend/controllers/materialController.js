@@ -103,3 +103,38 @@ export const deleteMaterial = async (req, res) => {
   }
 }
 
+export const uploadMaterials = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' })
+    }
+
+    const file = req.file
+
+    // Validate file type
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'text/csv' // .csv
+    ]
+
+    if (!allowedTypes.includes(file.mimetype) && !file.originalname.match(/\.(xlsx|xls|csv)$/i)) {
+      return res.status(400).json({ 
+        message: 'Invalid file type. Please upload XLSX, XLS, or CSV file.' 
+      })
+    }
+
+    // TODO: Implement Excel/CSV parsing using xlsx library
+    // For now, return a placeholder response
+    // You'll need to install: npm install multer xlsx
+    res.json({
+      success: true,
+      message: 'File uploaded successfully. Excel parsing to be implemented.',
+      fileName: file.originalname,
+      fileSize: file.size
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+

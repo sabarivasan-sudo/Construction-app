@@ -11,6 +11,7 @@ export const getUsers = async (req, res) => {
 
     const users = await User.find(filter)
       .select('-password')
+      .populate('projects', 'name')
       .sort({ createdAt: -1 })
 
     res.json({
@@ -25,7 +26,9 @@ export const getUsers = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password')
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('projects', 'name')
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
@@ -49,11 +52,22 @@ export const updateUser = async (req, res) => {
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    ).select('-password')
+    )
+      .select('-password')
+      .populate('projects', 'name')
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
     }
+
+    await Activity.create({
+      type: 'user',
+      action: 'updated',
+      message: `User ${user.name} updated by ${req.user.name}`,
+      entityId: user._id,
+      entityType: 'User',
+      user: req.user.id
+    })
 
     res.json({
       success: true,
@@ -101,6 +115,61 @@ export const createUser = async (req, res) => {
         phone: user.phone,
         department: user.department
       }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// @desc    Update user password
+// @route   PUT /api/users/:id/password
+// @access  Private
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide current and new password' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' })
+    }
+
+    // Only allow users to update their own password, or admins to update any password
+    const userId = req.params.id
+    if (userId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to update this password' })
+    }
+
+    const user = await User.findById(userId).select('+password')
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    // Verify current password
+    const isMatch = await user.matchPassword(currentPassword)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' })
+    }
+
+    // Update password
+    user.password = newPassword
+    await user.save()
+
+    await Activity.create({
+      type: 'user',
+      action: 'updated',
+      message: `Password updated for user ${user.name}`,
+      entityId: user._id,
+      entityType: 'User',
+      user: req.user.id
+    })
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully'
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

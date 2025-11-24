@@ -11,28 +11,75 @@ import PettyCash from '../models/PettyCash.js'
 // @access  Private
 export const getDashboard = async (req, res) => {
   try {
+    // Get current user to check their assigned projects
+    const User = (await import('../models/User.js')).default
+    const currentUser = await User.findById(req.user.id).select('role projects')
+    
+    // Build project filter for non-admin users
+    let projectFilter = {}
+    let projectIds = []
+    
+    if (currentUser.role !== 'admin') {
+      if (currentUser.projects && currentUser.projects.length > 0) {
+        // Convert to ObjectIds if they're strings
+        projectIds = currentUser.projects.map(p => 
+          typeof p === 'string' ? p : p._id || p
+        )
+        projectFilter._id = { $in: projectIds }
+      } else {
+        // If user has no assigned projects, return empty dashboard
+        return res.json({
+          success: true,
+          data: {
+            kpis: {
+              activeProjects: 0,
+              dailyAttendance: 0,
+              activeTasks: 0,
+              pendingIssues: 0
+            },
+            materialStockData: [],
+            projectProgress: 0,
+            activityFeed: [],
+            activeTasksList: [],
+            pettyCash: {
+              balance: 0,
+              totalExpenses: 0,
+              totalIncome: 0
+            }
+          }
+        })
+      }
+    }
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    // Get active projects count
-    const activeProjects = await Project.countDocuments({ status: 'active' })
+    // Get active projects count (filtered by assigned projects)
+    const activeProjectsFilter = { status: 'active', ...projectFilter }
+    const activeProjects = await Project.countDocuments(activeProjectsFilter)
 
-    // Get today's attendance
-    const todayAttendance = await Attendance.countDocuments({
-      date: { $gte: today }
-    })
+    // Get today's attendance (filtered by assigned projects)
+    const todayAttendanceFilter = { date: { $gte: today } }
+    if (currentUser.role !== 'admin' && projectIds.length > 0) {
+      todayAttendanceFilter.project = { $in: projectIds }
+    }
+    const todayAttendance = await Attendance.countDocuments(todayAttendanceFilter)
 
-    // Get active tasks count
-    const activeTasks = await Task.countDocuments({
-      status: { $in: ['pending', 'in-progress'] }
-    })
+    // Get active tasks count (filtered by assigned projects)
+    const activeTasksFilter = { status: { $in: ['pending', 'in-progress'] } }
+    if (currentUser.role !== 'admin' && projectIds.length > 0) {
+      activeTasksFilter.project = { $in: projectIds }
+    }
+    const activeTasks = await Task.countDocuments(activeTasksFilter)
 
-    // Get pending issues count
-    const pendingIssues = await Issue.countDocuments({
-      status: { $in: ['open', 'in-progress'] }
-    })
+    // Get pending issues count (filtered by assigned projects)
+    const pendingIssuesFilter = { status: { $in: ['open', 'in-progress'] } }
+    if (currentUser.role !== 'admin' && projectIds.length > 0) {
+      pendingIssuesFilter.project = { $in: projectIds }
+    }
+    const pendingIssues = await Issue.countDocuments(pendingIssuesFilter)
 
-    // Get material stock levels
+    // Get material stock levels (no project filter needed - materials are global)
     const materials = await Material.find().select('name category currentStock capacity')
     const materialStockData = materials.map(m => ({
       name: m.name,
@@ -40,14 +87,18 @@ export const getDashboard = async (req, res) => {
       capacity: m.capacity
     }))
 
-    // Calculate overall project progress
-    const projects = await Project.find()
+    // Calculate overall project progress (filtered by assigned projects)
+    const projects = await Project.find(projectFilter)
     const totalProgress = projects.length > 0
       ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length)
       : 0
 
-    // Get recent activities
-    const activities = await Activity.find()
+    // Get recent activities (filtered by assigned projects)
+    const activitiesFilter = {}
+    if (currentUser.role !== 'admin' && projectIds.length > 0) {
+      activitiesFilter.project = { $in: projectIds }
+    }
+    const activities = await Activity.find(activitiesFilter)
       .populate('user', 'name')
       .populate('project', 'name')
       .sort({ createdAt: -1 })
@@ -62,8 +113,8 @@ export const getDashboard = async (req, res) => {
       user: activity.user?.name || 'System'
     }))
 
-    // Get active tasks with details
-    const tasks = await Task.find({ status: { $in: ['pending', 'in-progress'] } })
+    // Get active tasks with details (filtered by assigned projects)
+    const tasks = await Task.find(activeTasksFilter)
       .populate('project', 'name')
       .limit(4)
       .lean()
@@ -75,8 +126,12 @@ export const getDashboard = async (req, res) => {
       priority: task.priority
     }))
 
-    // Get petty cash balance
-    const pettyCashEntries = await PettyCash.find()
+    // Get petty cash balance (filtered by assigned projects)
+    const pettyCashFilter = {}
+    if (currentUser.role !== 'admin' && projectIds.length > 0) {
+      pettyCashFilter.project = { $in: projectIds }
+    }
+    const pettyCashEntries = await PettyCash.find(pettyCashFilter)
     const totalExpenses = pettyCashEntries
       .filter(entry => entry.type === 'expense')
       .reduce((sum, entry) => sum + entry.amount, 0)

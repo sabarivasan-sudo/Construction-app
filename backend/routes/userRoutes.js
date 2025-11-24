@@ -4,7 +4,8 @@ import {
   getUser,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  updatePassword
 } from '../controllers/userController.js'
 import { protect, authorize } from '../middleware/auth.js'
 
@@ -18,6 +19,8 @@ router.route('/:id')
   .get(protect, getUser)
   .put(protect, updateUser)
   .delete(protect, authorize('admin'), deleteUser)
+
+router.put('/:id/password', protect, updatePassword)
 
 export default router
 

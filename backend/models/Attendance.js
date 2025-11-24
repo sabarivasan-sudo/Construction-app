@@ -29,10 +29,35 @@ const attendanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['present', 'absent', 'late', 'half-day'],
+    enum: ['present', 'absent', 'on-leave', 'half-day'],
     default: 'present'
   },
+  overtime: {
+    type: Number,
+    default: 0 // in hours
+  },
+  lateArrival: {
+    type: Boolean,
+    default: false
+  },
+  earlyLeave: {
+    type: Boolean,
+    default: false
+  },
   notes: {
+    type: String,
+    trim: true
+  },
+  photo: {
+    type: String // Base64 encoded image
+  },
+  latitude: {
+    type: Number
+  },
+  longitude: {
+    type: Number
+  },
+  locationName: {
     type: String,
     trim: true
   }

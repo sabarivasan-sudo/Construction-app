@@ -28,6 +28,9 @@ export const register = async (req, res) => {
 
     const token = user.generateToken()
 
+    // Populate projects for the user
+    await user.populate('projects', 'name')
+
     // Create activity
     await Activity.create({
       type: 'user',
@@ -45,7 +48,8 @@ export const register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        projects: user.projects || []
       }
     })
   } catch (error) {
@@ -76,6 +80,9 @@ export const login = async (req, res) => {
 
     const token = user.generateToken()
 
+    // Populate projects for the user
+    await user.populate('projects', 'name')
+
     res.json({
       success: true,
       token,
@@ -83,7 +90,8 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        projects: user.projects || []
       }
     })
   } catch (error) {
@@ -97,6 +105,7 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
+      .populate('projects', 'name')
     res.json({
       success: true,
       user: {
@@ -105,7 +114,8 @@ export const getMe = async (req, res) => {
         email: user.email,
         role: user.role,
         phone: user.phone,
-        department: user.department
+        department: user.department,
+        projects: user.projects || []
       }
     })
   } catch (error) {
