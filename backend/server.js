@@ -39,6 +39,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 // Routes
 app.use('/api', routes)
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 

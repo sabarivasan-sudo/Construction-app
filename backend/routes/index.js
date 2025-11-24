@@ -13,6 +13,7 @@ import resourceRoutes from './resourceRoutes.js'
 import userRoutes from './userRoutes.js'
 import roleRoutes from './roleRoutes.js'
 import reportRoutes from './reportRoutes.js'
+import dailyProgressRoutes from './dailyProgressRoutes.js'
 
 const router = express.Router()
 
@@ -30,6 +31,7 @@ router.use('/resources', resourceRoutes)
 router.use('/users', userRoutes)
 router.use('/roles', roleRoutes)
 router.use('/reports', reportRoutes)
+router.use('/daily-progress', dailyProgressRoutes)
 
 export default router
 
