@@ -14,9 +14,6 @@ dotenv.config()
 
 // Check required environment variables
 if (!process.env.JWT_SECRET) {
-  console.error('❌ ERROR: JWT_SECRET is not set in environment variables!')
-  console.error('Please add JWT_SECRET to your .env file in the backend folder')
-  console.error('Example: JWT_SECRET=your_super_secret_jwt_key_change_this_in_production')
   process.exit(1)
 }
 
@@ -71,7 +68,6 @@ if (process.env.NODE_ENV === 'production') {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack)
   res.status(500).json({ 
     message: err.message || 'Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
@@ -80,7 +76,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`)
-})
+app.listen(PORT, () => {})
 

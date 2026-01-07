@@ -277,7 +277,7 @@ export const uploadAttachment = async (req, res) => {
       try {
         fs.unlinkSync(req.file.path)
       } catch (e) {
-        console.error('Error deleting file:', e)
+        // File deletion failed
       }
     }
     res.status(500).json({ message: error.message })

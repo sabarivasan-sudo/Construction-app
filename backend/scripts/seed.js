@@ -72,15 +72,8 @@ const seedData = async () => {
       { name: 'Gravel', category: 'gravel', unit: 'cubic-meter', currentStock: 55, capacity: 100 }
     ])
 
-    console.log('✅ Seed data created successfully!')
-    console.log('Demo accounts:')
-    console.log('  Admin: admin@demo.com / 123456')
-    console.log('  Manager: manager@demo.com / 123456')
-    console.log('  Employee: employee@demo.com / 123456')
-    
     process.exit(0)
   } catch (error) {
-    console.error('❌ Error seeding data:', error)
     process.exit(1)
   }
 }
