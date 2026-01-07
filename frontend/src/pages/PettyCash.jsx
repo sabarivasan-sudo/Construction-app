@@ -83,7 +83,6 @@ const PettyCash = () => {
         showToast(errorData.message || 'Failed to fetch transactions', 'error')
       }
     } catch (error) {
-      console.error('Error fetching transactions:', error)
       showToast('Error fetching transactions', 'error')
     } finally {
       setLoading(false)
@@ -107,7 +106,6 @@ const PettyCash = () => {
         setProjects(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -128,7 +126,6 @@ const PettyCash = () => {
         setExpenseData(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching weekly data:', error)
     }
   }
 
@@ -196,7 +193,6 @@ const PettyCash = () => {
         showToast(data.message || 'Failed to save transaction', 'error')
       }
     } catch (error) {
-      console.error('Error saving transaction:', error)
       showToast('Error saving transaction', 'error')
     } finally {
       setSubmitting(false)
@@ -243,7 +239,6 @@ const PettyCash = () => {
         showToast(data.message || 'Failed to delete transaction', 'error')
       }
     } catch (error) {
-      console.error('Error deleting transaction:', error)
       showToast('Error deleting transaction', 'error')
     }
   }

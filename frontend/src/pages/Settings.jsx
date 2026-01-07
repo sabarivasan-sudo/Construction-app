@@ -51,7 +51,6 @@ const Settings = () => {
       try {
         setNotifications(JSON.parse(savedNotifications))
       } catch (e) {
-        console.error('Error loading notification preferences:', e)
       }
     }
     // Load general settings from localStorage
@@ -60,7 +59,6 @@ const Settings = () => {
       try {
         setGeneralSettings(JSON.parse(savedGeneral))
       } catch (e) {
-        console.error('Error loading general settings:', e)
       }
     }
   }, [])
@@ -95,7 +93,6 @@ const Settings = () => {
         window.location.href = '/login'
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error)
       showToast(t('errorLoadingProfile'), 'error')
     } finally {
       setLoading(false)
@@ -149,7 +146,6 @@ const Settings = () => {
         showToast(errorData.message || t('errorUpdatingProfile'), 'error')
       }
     } catch (error) {
-      console.error('Error updating profile:', error)
       showToast(t('errorUpdatingProfile'), 'error')
     } finally {
       setSaving(false)
@@ -207,7 +203,6 @@ const Settings = () => {
         showToast(errorMessage, 'error')
       }
     } catch (error) {
-      console.error('Error updating password:', error)
       showToast(t('errorUpdatingPassword'), 'error')
     } finally {
       setSaving(false)

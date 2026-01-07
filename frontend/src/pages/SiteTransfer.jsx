@@ -138,7 +138,6 @@ const SiteTransfer = () => {
         showToast(errorData.message || 'Failed to fetch transfers', 'error')
       }
     } catch (error) {
-      console.error('Error fetching transfers:', error)
       showToast('Error fetching transfers', 'error')
     } finally {
       setLoading(false)
@@ -162,7 +161,6 @@ const SiteTransfer = () => {
         setMaterials(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching materials:', error)
     }
   }
 
@@ -231,7 +229,6 @@ const SiteTransfer = () => {
         showToast(data.message || 'Failed to save transfer', 'error')
       }
     } catch (error) {
-      console.error('Error saving transfer:', error)
       showToast('Error saving transfer', 'error')
     } finally {
       setSubmitting(false)
@@ -280,7 +277,6 @@ const SiteTransfer = () => {
         showToast(data.message || 'Failed to delete transfer', 'error')
       }
     } catch (error) {
-      console.error('Error deleting transfer:', error)
       showToast('Error deleting transfer', 'error')
     }
   }

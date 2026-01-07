@@ -56,7 +56,6 @@ const IssueDetails = () => {
       }
     } catch (err) {
       setError('Failed to load issue details')
-      console.error('Error fetching issue:', err)
     } finally {
       setLoading(false)
     }
@@ -166,7 +165,6 @@ const IssueDetails = () => {
         alert('Failed to add comment')
       }
     } catch (err) {
-      console.error('Error adding comment:', err)
       alert('Error adding comment')
     } finally {
       setSubmittingComment(false)

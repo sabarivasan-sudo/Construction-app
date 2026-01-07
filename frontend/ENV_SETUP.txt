@@ -1,0 +1,17 @@
+FRONTEND ENVIRONMENT VARIABLES SETUP
+=====================================
+
+Create a .env file in the frontend folder with these variables:
+
+FOR DEVELOPMENT:
+----------------
+VITE_API_URL=http://localhost:5000/api
+
+FOR PRODUCTION (Separate Deployment):
+-------------------------------------
+VITE_API_URL=https://your-backend-domain.com/api
+
+FOR PRODUCTION (Single Server):
+-------------------------------
+VITE_API_URL=/api
+

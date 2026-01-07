@@ -15,7 +15,6 @@ const Header = ({ onMenuClick, showMenuButton }) => {
       try {
         setUser(JSON.parse(userStr))
       } catch (e) {
-        console.error('Error parsing user data:', e)
       }
     }
 
@@ -29,7 +28,6 @@ const Header = ({ onMenuClick, showMenuButton }) => {
         try {
           setUser(JSON.parse(userStr))
         } catch (e) {
-          console.error('Error parsing user data:', e)
         }
       }
     }

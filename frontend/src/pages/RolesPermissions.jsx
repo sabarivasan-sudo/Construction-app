@@ -98,7 +98,6 @@ const RolesPermissions = () => {
         showToast(errorData.message || 'Failed to fetch roles', 'error')
       }
     } catch (error) {
-      console.error('Error fetching roles:', error)
       showToast('Error fetching roles', 'error')
     } finally {
       setLoading(false)
@@ -176,7 +175,6 @@ const RolesPermissions = () => {
         showToast(data.message || 'Failed to save role', 'error')
       }
     } catch (error) {
-      console.error('Error saving role:', error)
       showToast('Error saving role', 'error')
     } finally {
       setSubmitting(false)
@@ -231,7 +229,6 @@ const RolesPermissions = () => {
         showToast(data.message || 'Failed to delete role', 'error')
       }
     } catch (error) {
-      console.error('Error deleting role:', error)
       showToast('Error deleting role', 'error')
     }
   }

@@ -67,7 +67,6 @@ const Consumption = () => {
         showToast(errorData.message || 'Failed to fetch consumptions', 'error')
       }
     } catch (error) {
-      console.error('Error fetching consumptions:', error)
       showToast('Error fetching consumptions', 'error')
     } finally {
       setLoading(false)
@@ -91,7 +90,6 @@ const Consumption = () => {
         setMaterials(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching materials:', error)
     }
   }
 
@@ -112,7 +110,6 @@ const Consumption = () => {
         setProjects(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -133,7 +130,6 @@ const Consumption = () => {
         setChartData(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching weekly data:', error)
     }
   }
 
@@ -200,7 +196,6 @@ const Consumption = () => {
         showToast(data.message || 'Failed to save consumption', 'error')
       }
     } catch (error) {
-      console.error('Error saving consumption:', error)
       showToast('Error saving consumption', 'error')
     } finally {
       setSubmitting(false)
@@ -246,7 +241,6 @@ const Consumption = () => {
         showToast(data.message || 'Failed to delete consumption', 'error')
       }
     } catch (error) {
-      console.error('Error deleting consumption:', error)
       showToast('Error deleting consumption', 'error')
     }
   }

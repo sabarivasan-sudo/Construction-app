@@ -79,7 +79,6 @@ const Resources = () => {
         window.location.href = '/login'
       }
     } catch (error) {
-      console.error('Error fetching resources:', error)
     } finally {
       setLoading(false)
     }
@@ -102,7 +101,6 @@ const Resources = () => {
         setSummary(data.data || { labour: [], machinery: [], subcontractor: [] })
       }
     } catch (error) {
-      console.error('Error fetching summary:', error)
     }
   }
 
@@ -123,7 +121,6 @@ const Resources = () => {
         setProjects(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -197,7 +194,6 @@ const Resources = () => {
         showToast(data.message || 'Failed to save resource', 'error')
       }
     } catch (error) {
-      console.error('Error saving resource:', error)
       showToast('Error saving resource', 'error')
     } finally {
       setSubmitting(false)
@@ -249,7 +245,6 @@ const Resources = () => {
         showToast(data.message || 'Failed to delete resource', 'error')
       }
     } catch (error) {
-      console.error('Error deleting resource:', error)
       showToast('Error deleting resource', 'error')
     }
   }

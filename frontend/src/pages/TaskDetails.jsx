@@ -56,7 +56,6 @@ const TaskDetails = () => {
       }
     } catch (err) {
       setError('Failed to load task details')
-      console.error('Error fetching task:', err)
     } finally {
       setLoading(false)
     }
@@ -162,7 +161,6 @@ const TaskDetails = () => {
         alert('Failed to add comment')
       }
     } catch (err) {
-      console.error('Error adding comment:', err)
       alert('Error adding comment')
     } finally {
       setSubmittingComment(false)

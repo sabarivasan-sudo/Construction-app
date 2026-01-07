@@ -159,7 +159,6 @@ export const LanguageProvider = ({ children }) => {
             setLanguage('en')
           }
         } catch (e) {
-          console.error('Error parsing general settings:', e)
         }
       }
     }
@@ -178,7 +177,6 @@ export const LanguageProvider = ({ children }) => {
         settings.language = lang
         localStorage.setItem('generalSettings', JSON.stringify(settings))
       } catch (e) {
-        console.error('Error updating general settings:', e)
       }
     }
   }

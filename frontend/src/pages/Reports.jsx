@@ -54,7 +54,6 @@ const Reports = () => {
         window.location.href = '/login'
       }
     } catch (error) {
-      console.error('Error fetching project progress:', error)
     } finally {
       setLoading(false)
     }
@@ -77,7 +76,6 @@ const Reports = () => {
         setExpenseData(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching expense trend:', error)
     }
   }
 
@@ -113,7 +111,6 @@ const Reports = () => {
         showToast(errorData.message || 'Failed to fetch report', 'error')
       }
     } catch (error) {
-      console.error('Error fetching report:', error)
       showToast('Error fetching report', 'error')
     }
   }
@@ -191,7 +188,6 @@ const Reports = () => {
         showToast(errorData.message || 'Failed to export report', 'error')
       }
     } catch (error) {
-      console.error('Error exporting report:', error)
       showToast('Error exporting report', 'error')
     }
   }

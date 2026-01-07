@@ -55,7 +55,6 @@ const Users = () => {
         setProjects(data.data || [])
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -114,7 +113,6 @@ const Users = () => {
         showToast(errorData.message || 'Failed to fetch users', 'error')
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
       showToast('Error fetching users', 'error')
     } finally {
       setLoading(false)
@@ -187,7 +185,6 @@ const Users = () => {
         showToast(data.message || 'Failed to save user', 'error')
       }
     } catch (error) {
-      console.error('Error saving user:', error)
       showToast('Error saving user', 'error')
     } finally {
       setSubmitting(false)
@@ -231,7 +228,6 @@ const Users = () => {
         showToast(data.message || 'Failed to deactivate user', 'error')
       }
     } catch (error) {
-      console.error('Error deleting user:', error)
       showToast('Error deactivating user', 'error')
     }
   }

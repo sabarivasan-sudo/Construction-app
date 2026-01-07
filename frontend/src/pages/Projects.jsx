@@ -191,7 +191,6 @@ const Projects = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         return
       }
 
@@ -212,10 +211,8 @@ const Projects = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch users' }))
-        console.error('Error fetching users:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
     }
   }
 
@@ -224,7 +221,6 @@ const Projects = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         setLoading(false)
         return
       }
@@ -246,10 +242,8 @@ const Projects = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch projects' }))
-        console.error('Error fetching projects:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     } finally {
       setLoading(false)
     }
@@ -331,7 +325,6 @@ const Projects = () => {
       const errorMsg = 'Network error. Please check if backend is running.'
       setError(errorMsg)
       showToast(errorMsg, 'error')
-      console.error('Project error:', err)
     } finally {
       setSubmitting(false)
     }
@@ -445,7 +438,6 @@ const Projects = () => {
               preview: file.type.includes('image') ? base64 : null // Preview for images
             }
           } catch (error) {
-            console.error('Error processing file:', error)
             showToast(`Error processing ${file.name}`, 'error')
             return null
           }
@@ -459,7 +451,6 @@ const Projects = () => {
         showToast(`${successfulFiles.length} file(s) uploaded successfully`, 'success')
       }
     } catch (error) {
-      console.error('Error uploading files:', error)
       showToast('Error uploading files', 'error')
     } finally {
       setUploadingFiles(false)
@@ -554,7 +545,6 @@ const Projects = () => {
       const errorMsg = 'Network error. Please check if backend is running.'
       setError(errorMsg)
       showToast(errorMsg, 'error')
-      console.error('Delete project error:', err)
     } finally {
       setSubmitting(false)
     }

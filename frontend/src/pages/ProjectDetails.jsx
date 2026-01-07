@@ -50,7 +50,6 @@ const ProjectDetails = () => {
       }
     } catch (err) {
       setError('Failed to load project details')
-      console.error('Error fetching project:', err)
     } finally {
       setLoading(false)
     }

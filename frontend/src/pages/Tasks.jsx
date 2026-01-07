@@ -141,7 +141,6 @@ const Tasks = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         setLoading(false)
         return
       }
@@ -163,10 +162,8 @@ const Tasks = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch tasks' }))
-        console.error('Error fetching tasks:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching tasks:', error)
     } finally {
       setLoading(false)
     }
@@ -177,7 +174,6 @@ const Tasks = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         return
       }
 
@@ -198,10 +194,8 @@ const Tasks = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch projects' }))
-        console.error('Error fetching projects:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -210,7 +204,6 @@ const Tasks = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         return
       }
 
@@ -231,10 +224,8 @@ const Tasks = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch users' }))
-        console.error('Error fetching users:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
     }
   }
 
@@ -302,7 +293,6 @@ const Tasks = () => {
       }
     } catch (err) {
       showToast('Network error. Please check if backend is running.', 'error')
-      console.error('Task error:', err)
     } finally {
       setSubmitting(false)
     }
@@ -386,7 +376,6 @@ const Tasks = () => {
       }
     } catch (err) {
       showToast('Network error. Please check if backend is running.', 'error')
-      console.error('Delete task error:', err)
     } finally {
       setSubmitting(false)
     }

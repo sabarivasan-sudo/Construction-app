@@ -102,7 +102,6 @@ const Inventory = () => {
         showToast(errorData.message || 'Failed to fetch materials', 'error')
       }
     } catch (error) {
-      console.error('Error fetching materials:', error)
       showToast('Error fetching materials', 'error')
     } finally {
       setLoading(false)
@@ -173,7 +172,6 @@ const Inventory = () => {
         showToast(data.message || 'Failed to save material', 'error')
       }
     } catch (error) {
-      console.error('Error saving material:', error)
       showToast('Error saving material', 'error')
     } finally {
       setSubmitting(false)
@@ -219,7 +217,6 @@ const Inventory = () => {
         showToast(data.message || 'Failed to delete material', 'error')
       }
     } catch (error) {
-      console.error('Error deleting material:', error)
       showToast('Error deleting material', 'error')
     }
   }
@@ -281,7 +278,6 @@ const Inventory = () => {
         showToast(data.message || 'Failed to upload materials', 'error')
       }
     } catch (error) {
-      console.error('Error uploading file:', error)
       showToast('Error uploading file', 'error')
     } finally {
       setUploadingFile(false)

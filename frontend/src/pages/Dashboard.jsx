@@ -58,6 +58,14 @@ const Dashboard = () => {
   const [progressHistory, setProgressHistory] = useState([])
   const [viewingImage, setViewingImage] = useState(null)
   const fileInputRef = useRef(null)
+  const [showAttendanceUploadModal, setShowAttendanceUploadModal] = useState(false)
+  const [attendanceUploadFile, setAttendanceUploadFile] = useState(null)
+  const [uploadingAttendance, setUploadingAttendance] = useState(false)
+  const [attendanceLogs, setAttendanceLogs] = useState([])
+  const [showAttendanceLogs, setShowAttendanceLogs] = useState(false)
+  const [userListInfo, setUserListInfo] = useState([])
+  const [showUserListInfo, setShowUserListInfo] = useState(false)
+  const attendanceFileInputRef = useRef(null)
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
   // Base URL for static file serving (without /api)
@@ -75,7 +83,6 @@ const Dashboard = () => {
           setSelectedProject(userData.projects[0]._id || userData.projects[0])
         }
       } catch (e) {
-        console.error('Error parsing user data:', e)
       }
     }
 
@@ -91,6 +98,23 @@ const Dashboard = () => {
     }
   }, [selectedProject])
 
+  // Fetch attendance logs
+  const fetchAttendanceLogs = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${API_URL}/attendance?limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAttendanceLogs(data.data || [])
+      }
+    } catch (error) {
+    }
+  }
+
   const fetchDashboard = async () => {
     try {
       setLoading(true)
@@ -105,7 +129,6 @@ const Dashboard = () => {
         const data = await response.json()
         setDashboardData(data.data)
       } else {
-        console.error('Failed to fetch dashboard data')
         // Set default empty data if API fails
         setDashboardData({
           kpis: {
@@ -124,7 +147,6 @@ const Dashboard = () => {
         })
       }
     } catch (error) {
-      console.error('Error fetching dashboard:', error)
       // Set default empty data on error
       setDashboardData({
         kpis: {
@@ -207,7 +229,6 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('token')
       if (!token) {
-        console.error('No token found')
         return
       }
 
@@ -220,14 +241,12 @@ const Dashboard = () => {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('Projects fetched:', data)
         const projectsList = data.data || []
         setProjects(projectsList)
         
         if (projectsList.length > 0 && !selectedProject) {
           setSelectedProject(projectsList[0]._id)
         } else if (projectsList.length === 0) {
-          console.warn('No projects available for this user')
           addToast('No projects assigned. Please contact administrator.', 'info')
         }
       } else if (response.status === 401) {
@@ -237,11 +256,9 @@ const Dashboard = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch projects' }))
-        console.error('Error fetching projects:', errorData.message)
         addToast('Failed to load projects. Please refresh the page.', 'error')
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
       addToast('Failed to load projects. Please check your connection.', 'error')
     }
   }
@@ -293,7 +310,6 @@ const Dashboard = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching today progress:', error)
     }
   }
 
@@ -352,7 +368,6 @@ const Dashboard = () => {
         addToast(error.message || 'Failed to save progress', 'error')
       }
     } catch (error) {
-      console.error('Error saving progress:', error)
       addToast('Failed to save progress', 'error')
     }
   }
@@ -373,7 +388,6 @@ const Dashboard = () => {
         setProgressHistory(sorted)
       }
     } catch (error) {
-      console.error('Error fetching progress history:', error)
     }
   }
 
@@ -420,7 +434,6 @@ const Dashboard = () => {
         addToast(error.message || 'Failed to upload file', 'error')
       }
     } catch (error) {
-      console.error('Error uploading file:', error)
       addToast('Failed to upload file', 'error')
     }
 
@@ -449,7 +462,6 @@ const Dashboard = () => {
         addToast('Failed to delete file', 'error')
       }
     } catch (error) {
-      console.error('Error deleting file:', error)
       addToast('Failed to delete file', 'error')
     }
   }
@@ -463,6 +475,90 @@ const Dashboard = () => {
   const getTodayProgressPercentage = () => {
     if (!todayProgress) return 0
     return todayProgress.progressPercentage || 0
+  }
+
+  const handleAttendanceFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      addToast('File too large. Maximum size is 10MB', 'error')
+      return
+    }
+
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'text/csv' // .csv
+    ]
+
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      addToast('Invalid file type. Please upload XLSX, XLS, or CSV files', 'error')
+      return
+    }
+
+    setAttendanceUploadFile(file)
+  }
+
+  const handleAttendanceExcelUpload = async () => {
+    if (!attendanceUploadFile) {
+      addToast('Please select a file to upload', 'error')
+      return
+    }
+
+    setUploadingAttendance(true)
+
+    try {
+      const token = localStorage.getItem('token')
+      const formData = new FormData()
+      formData.append('file', attendanceUploadFile)
+
+      const response = await fetch(`${API_URL}/attendance/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        addToast(`Successfully uploaded ${data.count} attendance record(s)!`, 'success')
+        setShowAttendanceUploadModal(false)
+        setAttendanceUploadFile(null)
+        if (attendanceFileInputRef.current) {
+          attendanceFileInputRef.current.value = ''
+        }
+        
+        // Store user list info if available
+        if (data.userListInfo && data.userListInfo.length > 0) {
+          setUserListInfo(data.userListInfo)
+          const matchedCount = data.userListInfo.filter(u => u.status === 'matched').length
+          const createdCount = data.userListInfo.filter(u => u.status === 'created').length
+          const notFoundCount = data.userListInfo.filter(u => u.status === 'not_found' || u.status === 'creation_failed').length
+          
+          if (createdCount > 0) {
+            addToast(`${matchedCount} users matched, ${createdCount} workers auto-created!`, 'success')
+            setShowUserListInfo(true)
+          } else if (notFoundCount > 0) {
+            addToast(`${matchedCount} users matched, ${notFoundCount} users not found`, 'info')
+            setShowUserListInfo(true)
+          }
+        }
+        
+        await fetchAttendanceLogs()
+        await fetchDashboard()
+        setShowAttendanceLogs(true)
+      } else {
+        addToast(data.message || 'Failed to upload attendance', 'error')
+      }
+    } catch (error) {
+      addToast('Error uploading file', 'error')
+    } finally {
+      setUploadingAttendance(false)
+    }
   }
 
   // 3D Card Animation Variants for other sections
@@ -968,6 +1064,233 @@ const Dashboard = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Attendance Section - Side by Side */}
+        {showCards && (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          >
+            {/* Upload Attendance Excel Section */}
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ scale: 1.01, y: -4 }}
+              className="rounded-3xl p-6 bg-white shadow-xl backdrop-blur-xl border border-white/60 transition-all duration-300 ease-out"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Attendance Management</h2>
+                  <p className="text-sm text-gray-500 mt-1">Upload Excel/CSV file to import attendance logs</p>
+                </div>
+                <FiUsers className="w-6 h-6 text-primary" />
+              </div>
+              <button
+                onClick={() => {
+                  fetchProjects()
+                  setShowAttendanceUploadModal(true)
+                }}
+                className="w-full px-4 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl hover:from-primary/90 hover:to-purple-600/90 transition-all font-semibold flex items-center justify-center gap-2"
+              >
+                <FiUpload className="w-5 h-5" />
+                Upload Attendance Excel
+              </button>
+              {attendanceLogs.length > 0 && (
+                <button
+                  onClick={() => {
+                    fetchAttendanceLogs()
+                    setShowAttendanceLogs(true)
+                  }}
+                  className="w-full mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium flex items-center justify-center gap-2"
+                >
+                  <FiEye className="w-5 h-5" />
+                  View Attendance Logs ({attendanceLogs.length})
+                </button>
+              )}
+              {userListInfo.length > 0 && (
+                <button
+                  onClick={() => setShowUserListInfo(true)}
+                  className="w-full mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-all font-medium flex items-center justify-center gap-2"
+                >
+                  <FiUsers className="w-5 h-5" />
+                  View User Mapping ({userListInfo.filter(u => u.status === 'matched' || u.status === 'created').length}/{userListInfo.length})
+                </button>
+              )}
+            </motion.div>
+
+            {/* Attendance Logs Display */}
+            {showAttendanceLogs && attendanceLogs.length > 0 ? (
+              <motion.div
+                variants={cardVariants}
+                className="rounded-3xl p-6 bg-white shadow-xl backdrop-blur-xl border border-white/60 transition-all duration-300 ease-out"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-gray-800">Recent Attendance Logs</h2>
+                  <button
+                    onClick={() => setShowAttendanceLogs(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <FiX className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {attendanceLogs.slice(0, 20).map((log, index) => (
+                    <div
+                      key={log._id || index}
+                      className="p-4 rounded-xl bg-gray-50/50 border border-white/60"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="font-semibold text-dark">
+                            {log.user?.name || 'Unknown User'}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {log.project?.name || 'No Project'}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <FiCalendar className="w-3 h-3" />
+                              {new Date(log.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </span>
+                            {log.checkIn && (
+                              <span className="flex items-center gap-1">
+                                <FiClock className="w-3 h-3" />
+                                In: {new Date(log.checkIn).toLocaleTimeString('en-US', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                })}
+                              </span>
+                            )}
+                            {log.checkOut && new Date(log.checkOut).getTime() !== (log.checkIn ? new Date(log.checkIn).getTime() : 0) && (
+                              <span className="flex items-center gap-1">
+                                <FiClock className="w-3 h-3" />
+                                Out: {new Date(log.checkOut).toLocaleTimeString('en-US', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  hour12: true 
+                                })}
+                              </span>
+                            )}
+                            {log.workHours > 0 && (
+                              <span className="flex items-center gap-1 font-medium text-primary">
+                                <FiClock className="w-3 h-3" />
+                                {log.workHours.toFixed(1)} hrs
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`px-3 py-1 rounded-lg text-xs font-medium ${
+                          log.status === 'present' ? 'bg-green-100 text-green-800' :
+                          log.status === 'absent' ? 'bg-red-100 text-red-800' :
+                          log.status === 'on-leave' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {log.status || 'present'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                variants={cardVariants}
+                className="rounded-3xl p-6 bg-white shadow-xl backdrop-blur-xl border border-white/60 transition-all duration-300 ease-out flex items-center justify-center min-h-[400px]"
+              >
+                <div className="text-center">
+                  <FiUsers className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">No attendance logs</p>
+                  <p className="text-gray-400 text-sm mt-2">Upload an Excel file to see attendance logs here</p>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* User List Info Display */}
+        {showCards && showUserListInfo && userListInfo.length > 0 && (
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="rounded-3xl p-6 bg-white shadow-xl backdrop-blur-xl border border-white/60 transition-all duration-300 ease-out"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">User Mapping from Excel</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {userListInfo.filter(u => u.status === 'matched').length} matched, {userListInfo.filter(u => u.status === 'created').length} auto-created, {userListInfo.filter(u => u.status === 'not_found' || u.status === 'creation_failed').length} failed
+                </p>
+              </div>
+              <button
+                onClick={() => setShowUserListInfo(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <FiX className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {userListInfo.map((userInfo, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-xl border ${
+                    userInfo.status === 'matched' 
+                      ? 'bg-green-50 border-green-200' 
+                      : userInfo.status === 'created'
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-dark">
+                        {userInfo.csvName || `ID: ${userInfo.csvId}`}
+                      </p>
+                      {userInfo.status === 'matched' ? (
+                        <p className="text-sm text-green-700 mt-1">
+                          ✓ Matched with: {userInfo.matchedUserName}
+                        </p>
+                      ) : userInfo.status === 'created' ? (
+                        <p className="text-sm text-blue-700 mt-1">
+                          ✓ Auto-created worker: {userInfo.matchedUserName}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-red-700 mt-1">
+                          ✗ {userInfo.status === 'creation_failed' ? 'Failed to create user' : 'User not found in database'}
+                          {userInfo.actualName && userInfo.actualName !== userInfo.csvName && (
+                            <span className="text-xs text-gray-500 ml-2">
+                              (Searched for: {userInfo.actualName})
+                            </span>
+                          )}
+                          {userInfo.error && (
+                            <span className="text-xs text-red-600 ml-2 block mt-1">
+                              Error: {userInfo.error}
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                      userInfo.status === 'matched' 
+                        ? 'bg-green-100 text-green-800' 
+                        : userInfo.status === 'created'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {userInfo.status === 'matched' ? 'Matched' : userInfo.status === 'created' ? 'Created' : 'Failed'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Today's Progress Modal */}
@@ -1238,7 +1561,6 @@ const Dashboard = () => {
                       addToast(error.message || 'Failed to save', 'error')
                     }
                   } catch (error) {
-                    console.error('Error saving today\'s work:', error)
                     addToast('Failed to save today\'s work', 'error')
                   }
                 }}
@@ -1399,7 +1721,6 @@ const Dashboard = () => {
                                         alt={file.name}
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
-                                          console.error('Image load error:', `${BASE_URL}${file.url}`)
                                           e.target.style.display = 'none'
                                         }}
                                       />
@@ -1759,7 +2080,6 @@ const Dashboard = () => {
                   alt="Progress Photo"
                   className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
                   onError={(e) => {
-                    console.error('Failed to load image:', viewingImage)
                     e.target.style.display = 'none'
                     const errorDiv = document.createElement('div')
                     errorDiv.className = 'text-center py-12'
@@ -1773,6 +2093,114 @@ const Dashboard = () => {
                     e.target.parentElement.appendChild(errorDiv)
                   }}
                 />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Attendance Upload Modal */}
+      <AnimatePresence>
+        {showAttendanceUploadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAttendanceUploadModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+                <h2 className="text-2xl font-bold text-gray-800">Upload Attendance Excel/CSV</h2>
+                <button
+                  onClick={() => setShowAttendanceUploadModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <FiX className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-blue-800 mb-2">File Format Requirements</h3>
+                  <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                    <li>File must contain an "Attendance Logs" section</li>
+                    <li>Required columns: User ID, Timestamp</li>
+                    <li>Supported formats: .xlsx, .xls, .csv</li>
+                    <li>Maximum file size: 10MB</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Select Excel/CSV File
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      ref={attendanceFileInputRef}
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleAttendanceFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => attendanceFileInputRef.current?.click()}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
+                    >
+                      <FiUpload className="w-5 h-5" />
+                      Choose File
+                    </button>
+                    {attendanceUploadFile && (
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{attendanceUploadFile.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {(attendanceUploadFile.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAttendanceUploadModal(false)
+                      setAttendanceUploadFile(null)
+                      if (attendanceFileInputRef.current) {
+                        attendanceFileInputRef.current.value = ''
+                      }
+                    }}
+                    className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAttendanceExcelUpload}
+                    disabled={!attendanceUploadFile || uploadingAttendance}
+                    className="px-6 py-3 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {uploadingAttendance ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <FiUpload className="w-5 h-5" />
+                        Upload Attendance
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

@@ -159,7 +159,6 @@ const Attendance = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         setLoading(false)
         return
       }
@@ -180,10 +179,8 @@ const Attendance = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch attendance' }))
-        console.error('Error fetching attendance:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching attendance:', error)
     } finally {
       setLoading(false)
     }
@@ -194,7 +191,6 @@ const Attendance = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         return
       }
 
@@ -214,10 +210,8 @@ const Attendance = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch projects' }))
-        console.error('Error fetching projects:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching projects:', error)
     }
   }
 
@@ -226,7 +220,6 @@ const Attendance = () => {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        console.warn('No token found, user may need to login')
         return
       }
 
@@ -246,10 +239,8 @@ const Attendance = () => {
         window.location.href = '/login'
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch users' }))
-        console.error('Error fetching users:', errorData.message)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
     }
   }
 
@@ -311,7 +302,6 @@ const Attendance = () => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords
-            console.log('Fresh GPS coordinates when camera opens:', { latitude, longitude })
             const locationName = await getLocationName(latitude, longitude)
             setFormData(prev => ({
               ...prev,
@@ -321,7 +311,6 @@ const Attendance = () => {
             }))
           },
           (error) => {
-            console.error('Geolocation error:', error)
             // Don't show error toast, just silently fail - location is optional
           },
           {
@@ -332,7 +321,6 @@ const Attendance = () => {
         )
       }
     } catch (error) {
-      console.error('Error accessing camera:', error)
       showToast('Unable to access camera. Please check permissions.', 'error')
     }
   }
@@ -377,20 +365,17 @@ const Attendance = () => {
         })
         
         const { latitude: lat, longitude: lng } = position.coords
-        console.log('Fresh GPS coordinates on photo capture:', { lat, lng })
         
         // Validate coordinates are reasonable (not cached wrong location)
         // Chennai is roughly: 12.8°N to 13.2°N, 80.0°E to 80.3°E
         // If coordinates seem wrong, still use them but log warning
         if (lat < 8 || lat > 14 || lng < 76 || lng > 81) {
-          console.warn('Coordinates seem unusual for Tamil Nadu:', { lat, lng })
         }
         
         locationName = await getLocationName(lat, lng)
         latitude = lat.toString()
         longitude = lng.toString()
       } catch (error) {
-        console.error('Error getting location:', error)
         // If we have old coordinates, still try to get location name
         if (latitude && longitude && !locationName) {
           locationName = await getLocationName(
@@ -543,13 +528,11 @@ const Attendance = () => {
           })
           
           const { latitude: lat, longitude: lng } = position.coords
-          console.log('Fresh GPS coordinates on gallery select:', { lat, lng })
           
           locationName = await getLocationName(lat, lng)
           latitude = lat.toString()
           longitude = lng.toString()
         } catch (error) {
-          console.error('Error getting location:', error)
           // If we have old coordinates, still try to get location name
           if (latitude && longitude && !locationName) {
             locationName = await getLocationName(
@@ -698,7 +681,6 @@ const Attendance = () => {
       }
       reader.readAsDataURL(file)
     } catch (error) {
-      console.error('Error handling gallery image:', error)
       showToast('Error processing image', 'error')
     }
   }
@@ -727,8 +709,6 @@ const Attendance = () => {
       const address = data.address || {}
       
       // Debug: Log the full address data
-      console.log('OpenStreetMap address data:', address)
-      console.log('Display name:', data.display_name)
       
       // Priority order for locality (most specific first)
       let locality = 
@@ -791,7 +771,6 @@ const Attendance = () => {
       
       const finalName = parts.filter(Boolean).join(', ')
       
-      console.log('Extracted location:', { locality, city, state, finalName })
       
       // If we have at least locality and state, return it
       if (finalName && parts.length >= 2) {
@@ -814,7 +793,6 @@ const Attendance = () => {
           .slice(0, 3)
         
         if (relevantParts.length >= 2) {
-          console.log('Using display_name fallback:', relevantParts.join(', '))
           return relevantParts.join(', ')
         }
       }
@@ -822,7 +800,6 @@ const Attendance = () => {
       return finalName || 'Unknown Location'
       
     } catch (error) {
-      console.error('Error fetching location name:', error)
       return 'Unknown Location'
     }
   }
@@ -889,7 +866,6 @@ const Attendance = () => {
       }
     } catch (err) {
       showToast('Network error. Please check if backend is running.', 'error')
-      console.error('Error submitting attendance:', err)
     } finally {
       setSubmitting(false)
     }
@@ -945,7 +921,6 @@ const Attendance = () => {
       }
     } catch (err) {
       showToast('Network error. Please check if backend is running.', 'error')
-      console.error('Delete attendance error:', err)
     }
   }
 
@@ -1006,7 +981,6 @@ const Attendance = () => {
       }
     } catch (err) {
       showToast('Network error. Please check if backend is running.', 'error')
-      console.error('Error uploading file:', err)
     } finally {
       setUploadingFile(false)
     }

@@ -53,7 +53,6 @@ const Login = () => {
       try {
         data = await response.json()
       } catch (parseError) {
-        console.error('Error parsing response:', parseError)
         setError('Invalid response from server. Please check if backend is running.')
         setLoading(false)
         return
@@ -74,7 +73,6 @@ const Login = () => {
         setError(data.message || 'Login failed. Please check your credentials.')
       }
     } catch (err) {
-      console.error('Login error:', err)
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
         setError('Cannot connect to server. Please check if backend is running on port 5000.')
       } else {
@@ -133,7 +131,6 @@ const Login = () => {
       }
     } catch (err) {
       setError('Network error. Please check if backend is running.')
-      console.error('Register error:', err)
     } finally {
       setLoading(false)
     }
